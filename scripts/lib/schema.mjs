@@ -54,4 +54,3 @@ export function categorySchema({site,base,category,slug,posts}) {
 }
 
 function slugOfSafe(doc){const s=String(doc.meta.slug||doc.meta.id||'').replace(/^\/+|\/+$/g,'');return s?`/${s}/`:'/';}
-}
