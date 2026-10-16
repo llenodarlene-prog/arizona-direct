@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "disclosure_path": "/affiliate-disclosure/",
+  "default_rel": ["sponsored", "nofollow"],
+  "merchants": []
+}

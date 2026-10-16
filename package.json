@@ -6,7 +6,10 @@
     "clean": "node scripts/clean.mjs",
     "build": "node scripts/build.mjs",
     "check": "node scripts/check.mjs",
-    "verify": "npm run clean && npm run build && npm run check",
+    "content:check": "node scripts/check-content-graph.mjs",
+    "affiliate:check": "node scripts/check-affiliates.mjs",
+    "schema:check": "node scripts/check-schema.mjs",
+    "verify": "npm run clean && npm run build && npm run check && npm run content:check && npm run affiliate:check && npm run schema:check",
     "release:check": "node scripts/check-release.mjs",
     "schedule": "node scripts/schedule.mjs"
   }
