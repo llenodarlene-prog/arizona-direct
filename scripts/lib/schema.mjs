@@ -1,3 +1,14 @@
+const plain = text => String(text || '').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/[*_`>]/g,'').replace(/\s+/g,' ').trim();
+
+function faqEntries(body='') {
+  const section=body.split(/^## /m).find(part=>/^Frequently Asked Questions\b/i.test(part));
+  if(!section) return [];
+  return section.split(/^### /m).slice(1).map(block=>{
+    const [q,...rest]=block.split('\n');
+    return {question:plain(q),answer:plain(rest.join(' '))};
+  }).filter(x=>x.question&&x.answer);
+}
+
 export function schemaGraph({site,doc,url,canonical,category}) {
   const pageId=`${canonical}#webpage`;
   const orgId=`${site.url||canonical}#organization`;
@@ -27,5 +38,20 @@ export function schemaGraph({site,doc,url,canonical,category}) {
   } else if (type!=='WebPage') {
     graph.push({'@type':type,'@id':`${canonical}#main-entity`,name:String(doc.meta.title||site.name),url:canonical});
   }
+  const faq=faqEntries(doc.body);
+  if (faq.length) graph.push({'@type':'FAQPage','@id':`${canonical}#faq`,mainEntity:faq.map(item=>({'@type':'Question',name:item.question,acceptedAnswer:{'@type':'Answer',text:item.answer}}))});
   return {'@context':'https://schema.org','@graph':graph.map(x=>Object.fromEntries(Object.entries(x).filter(([,v])=>v!==undefined)))};
+}
+
+export function categorySchema({site,base,category,slug,posts}) {
+  const orgId=`${base}/#organization`; const websiteId=`${base}/#website`; const url=`${base}${slug}`;
+  return {'@context':'https://schema.org','@graph':[
+    {'@type':'Organization','@id':orgId,name:site.name,url:`${base}/`},
+    {'@type':'WebSite','@id':websiteId,name:site.name,url:`${base}/`,publisher:{'@id':orgId}},
+    {'@type':'CollectionPage','@id':`${url}#webpage`,name:category,url,isPartOf:{'@id':websiteId},mainEntity:{'@id':`${url}#itemlist`}},
+    {'@type':'ItemList','@id':`${url}#itemlist`,name:`${category} coverage`,itemListElement:posts.map((post,index)=>({'@type':'ListItem',position:index+1,name:String(post.meta.title||''),url:`${base}${slugOfSafe(post)}`}))}
+  ]};
+}
+
+function slugOfSafe(doc){const s=String(doc.meta.slug||doc.meta.id||'').replace(/^\/+|\/+$/g,'');return s?`/${s}/`:'/';}
 }
