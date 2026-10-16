@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { readDocuments, slugOf, isPublished, isPost } from './lib/content.mjs';
-import { schemaGraph } from './lib/schema.mjs';
+import { schemaGraph, categorySchema } from './lib/schema.mjs';
 
 const site=JSON.parse(await readFile('data/site.json','utf8'));
 const affiliate=JSON.parse(await readFile('data/affiliate.json','utf8'));
@@ -46,7 +46,8 @@ for(const doc of docs){
 for(const [category,posts] of categories){
   const slug=`/categories/${category.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}/`;
   const links=posts.map(p=>`<li><a href="${slugOf(p)}">${esc(p.meta.title)}</a></li>`).join('');
-  await emit(`dist${slug}index.html`,`<!doctype html><title>${esc(category)} | ${esc(site.name)}</title><meta name="robots" content="${robots}"><link rel="canonical" href="${base}${slug}"><h1>${esc(category)}</h1><ul>${links}</ul>`);
+  const graph=categorySchema({site,base,category,slug,posts});
+  await emit(`dist${slug}index.html`,`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(category)} | ${esc(site.name)}</title><meta name="robots" content="${robots}"><link rel="canonical" href="${base}${slug}"><script type="application/ld+json">${JSON.stringify(graph)}</script></head><body><main><h1>${esc(category)}</h1><ul>${links}</ul></main></body></html>`);
 }
 const homePosts=docs.filter(isPost).map(p=>`<li><a href="${slugOf(p)}">${esc(p.meta.title)}</a></li>`).join('');
 const homeGraph={'@context':'https://schema.org','@graph':[{'@type':'Organization','@id':`${base}/#organization`,name:site.name,url:`${base}/`},{'@type':'WebSite','@id':`${base}/#website`,url:`${base}/`,name:site.name,publisher:{'@id':`${base}/#organization`}},{'@type':'WebPage','@id':`${base}/#webpage`,url:`${base}/`,name:site.name,isPartOf:{'@id':`${base}/#website`}}]};
