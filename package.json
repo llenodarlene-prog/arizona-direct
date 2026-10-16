@@ -1,0 +1,13 @@
+{
+  "name": "arizona-direct-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "verify": "npm run clean && npm run build && npm run check",
+    "release:check": "node scripts/check-release.mjs",
+    "schedule": "node scripts/schedule.mjs"
+  }
+}

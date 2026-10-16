@@ -1,0 +1,16 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+const site=JSON.parse(await readFile('data/site.json','utf8'));
+const env=process.env.BUILD_ENV||'development';
+const configured=String(process.env.SITE_URL||site.url||'').replace(/\/$/,'');
+const fallback=env==='staging'?'https://staging.invalid':'https://arizona-direct.invalid';
+const base=configured||fallback;
+const indexable=env==='production';
+await mkdir('dist',{recursive:true});
+const robots=indexable?'index,follow':'noindex,nofollow,noarchive';
+const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${site.name}</title><meta name="description" content="${site.description}"><meta name="robots" content="${robots}"><link rel="canonical" href="${base}/"></head><body><main><h1>${site.name}</h1><p>${site.tagline}</p><p>The publishing platform is being prepared.</p></main></body></html>`;
+await writeFile('dist/index.html',html);
+await writeFile('dist/404.html','<!doctype html><title>Not Found</title><h1>404</h1>');
+await writeFile('dist/robots.txt',indexable?'User-agent: *\\nAllow: /\\n':'User-agent: *\\nDisallow: /\\n');
+await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url></urlset>`);
+await writeFile('dist/build-manifest.json',JSON.stringify({site:site.name,environment:env,indexable,base},null,2));
+console.log(`Built ${site.name} (${env}; indexable=${indexable})`);
