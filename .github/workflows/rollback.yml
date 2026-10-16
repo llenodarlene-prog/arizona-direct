@@ -1,0 +1,49 @@
+name: Rollback
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options: [staging, production]
+      commit_sha:
+        description: Exact 40-character commit SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  rollback:
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate SHA
+        shell: bash
+        run: '[[ "${{ inputs.commit_sha }}" =~ ^[0-9a-fA-F]{40}$ ]]'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.commit_sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Verify rollback build
+        shell: bash
+        run: |
+          npm ci
+          if [[ "${{ inputs.environment }}" == "production" ]]; then npm run release:check; BUILD_ENV=production npm run verify; else BUILD_ENV=staging npm run verify; fi
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+      - name: Deploy rollback
+        shell: bash
+        run: |
+          if [[ "${{ inputs.environment }}" == "staging" ]]; then export DEPLOY_REQUIRE_SUFFIX=/staging; else export DEPLOY_PRESERVE_DIR=staging; fi
+          bash scripts/deploy-document-root.sh
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_ROOT: ${{ secrets.DEPLOY_ROOT }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}

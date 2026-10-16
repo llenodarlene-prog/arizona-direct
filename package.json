@@ -1,0 +1,17 @@
+{
+  "name": "arizona-direct-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "content:check": "node scripts/check-content-graph.mjs",
+    "affiliate:check": "node scripts/check-affiliates.mjs",
+    "schema:check": "node scripts/check-schema.mjs",
+    "verify": "npm run clean && npm run build && npm run check && npm run content:check && npm run affiliate:check && npm run schema:check && npm run check:discoverability",
+    "release:check": "node scripts/check-release.mjs",
+    "schedule": "node scripts/schedule.mjs",
+    "check:discoverability": "node scripts/check-discoverability.mjs"
+  }
+}
