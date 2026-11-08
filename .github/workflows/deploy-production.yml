@@ -1,0 +1,39 @@
+name: Deploy production
+on:
+  push:
+    branches: [main]
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arizona-direct-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci && npm run release:check && BUILD_ENV=production npm run verify
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+      - run: bash scripts/deploy-document-root.sh
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_ROOT: ${{ secrets.DEPLOY_ROOT }}
+          DEPLOY_PRESERVE_DIR: staging
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      - run: node scripts/smoke-test.mjs
+        env:
+          SMOKE_URL: ${{ vars.SITE_URL }}
+          SMOKE_CANONICAL_URL: ${{ vars.SITE_URL }}
+          SMOKE_BRAND: ${{ vars.SITE_NAME }}
+          SMOKE_EXPECT_ROBOTS: index

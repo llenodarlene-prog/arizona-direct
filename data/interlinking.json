@@ -1,0 +1,7 @@
+{
+  "orphan_policy": "fail",
+  "require_category_for_published_posts": true,
+  "minimum_contextual_internal_links": 2,
+  "enforce_minimum_when_published_post_count_reaches": 3,
+  "cross_site_policy": "editorial_only"
+}

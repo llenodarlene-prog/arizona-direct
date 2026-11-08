@@ -1,0 +1,21 @@
+{
+  "publisher_type": "Organization",
+  "publisher_name": "Arizona Direct",
+  "allowed_primary_types": [
+    "Article",
+    "BlogPosting",
+    "NewsArticle",
+    "WebPage",
+    "AboutPage",
+    "ContactPage",
+    "CollectionPage",
+    "ItemList",
+    "Place",
+    "LocalBusiness",
+    "TouristAttraction",
+    "Hotel",
+    "Restaurant",
+    "Product",
+    "Review"
+  ]
+}
