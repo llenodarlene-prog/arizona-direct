@@ -1,8 +1,8 @@
 {
   "name": "Arizona Direct",
   "tagline": "Arizona choices verified.",
-  "url": "",
+  "url": "https://arizonadirect.org",
   "description": "Verified local guides, places, services, and practical choices across Arizona.",
   "locale": "en-US",
-  "launch_status": "prelaunch"
+  "launch_status": "ready"
 }
