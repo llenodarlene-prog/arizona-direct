@@ -21,6 +21,7 @@ jobs:
       - run: npm ci && BUILD_ENV=staging npm run verify
         env:
           SITE_URL: ${{ vars.SITE_URL }}
+          CANONICAL_URL: ${{ vars.PRODUCTION_URL }}
       - name: Confirm the staging target
         run: node scripts/check-staging-target.mjs
         env:
